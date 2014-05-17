@@ -4,5 +4,6 @@ pre_fix = 'controllers.'
 
 urls = (
         '/',        pre_fix + 'main.Test',
-        '/data',        pre_fix + 'initData.Data'
+        '/data',    pre_fix + 'initData.Data',
+        '/test',    pre_fix + 'test.Test'
 )

@@ -1,0 +1,7 @@
+$def with (coverInfo)
+$:render.header()
+<img src="$config.static/images/$coverInfo['artist']/$coverInfo['album_name']/$coverInfo['name']"></img>
+<br>
+<h1>$coverInfo['album_name']</h2>
+<h3>$coverInfo['artist']</h3>
+$:render.foot()

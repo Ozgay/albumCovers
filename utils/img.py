@@ -1,19 +1,21 @@
 # coding: UTF-8
 import Image
+from os.path import basename
 from os.path import getsize
-from config import settings
 
 class img:
     def __init__(self):
-        self.prePath =  '/home/lulu/albumCovers/static/images/'
+        self.prePath =  ''
 
-    def getImgInfo(self, filename):
-        im = Image.open(self.prePath + filename) 
+    def getImgInfo(self, filePath):
+        im = Image.open(filePath) 
         imgInfo = {}
+        imgInfo['path'] = filePath 
+        imgInfo['name'] = basename(filePath) 
         imgInfo['width'] = im.size[0]
         imgInfo['height'] = im.size[1]
         imgInfo['format'] = im.format
-        imgInfo['size'] = getsize(self.prePath + filename)
+        imgInfo['size'] = getsize(filePath)
         #print imgInfo
         return imgInfo
 
