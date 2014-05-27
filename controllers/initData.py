@@ -8,6 +8,7 @@ from config import settings
 from utils.img import img
 from dao import dao 
 from utils.getDataFromOther import borrowData 
+from utils.getDataFromItunes import itunesapi 
 
 class Data:
     def __init__(self):
@@ -20,6 +21,15 @@ class Data:
         return self.render.data()
 
     def POST(self):
+        data = web.input(path={}) 
+
+        #itunes api
+        if data.album_name:
+           itunesapi.getInfoByAlbumName(data.album_name, data.country) 
+
+        return 'ok'
+
+    def POST_old(self):
         data = web.input(path={}) 
 
         coverPath = ''
