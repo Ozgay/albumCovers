@@ -18,3 +18,11 @@ config = web.storage(
 web.template.Template.globals['config'] = config
 web.template.Template.globals['render'] = render
 
+
+c = {
+        'debug'     : True,
+        'db_url'    : 'http://127.0.0.1:5984/',
+        'db_name'   : {
+                        'cover' : 'albumcover'
+                      }  
+    }

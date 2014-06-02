@@ -1,9 +1,21 @@
 $:render.header() 
-        <img src="$config.static/images/onePiece.png"  width="1170" height="300"/>
         <br>
         <form enctype="multipart/form-data" action=? method="POST">
-          <p>country:           <input type="text" name="country" /></p>
-          <p>album_name:        <input type="text" name="album_name" /></p>
+        <div class="row">
+          <div class="input-prepend">
+            <span class="add-on">Album Name: </span><input type="text" class="form-control span8" placeholder="input album name" name="album_name">
+          </div>
+          <div class="input-prepend">
+            <span class="add-on">Country: </span><input type="text" class="form-control span2" placeholder="country code" name="country">
+          </div>
+        </div>
+        <!--div class="row">
+           <div class="input-prepend">
+             <span class="add-on">Artist Name: </span><input type="text" class="form-control span8" placeholder="input artist name" name="artist">
+           </div>
+        </div-->
+        <input type="submit" class="btn btn-default"  style="float:right" value="Submit"/>
+          <!--
           <p>artist:            <input type="text" name="artist" /></p>
           <p>year_record:       <input type="text" name="year_record" /></p>
           <p>music_contain:     <input type="text" name="music_contain" /></p>
@@ -11,7 +23,10 @@ $:render.header()
           <p>ximiURL:           <input type="text" name="ximiurl" /></p>
           <p>coverURL:          <input type="text" name="coverurl" /></p> 
           <p>file:              <input type="file" name="path" /></p> 
-
           <input type="submit" value="Submit" />
+          -->
+
         </form>
+        <br>
+        <img src="$config.static/images/onePiece.png"  width="1170" height="200"/>
 $:render.foot()

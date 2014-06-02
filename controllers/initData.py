@@ -3,10 +3,11 @@ import web
 import os
 import shutil
 import traceback
+import DEBUG
 from datetime import datetime
 from config import settings
 from utils.img import img
-from dao import dao 
+from model import dao
 from utils.getDataFromOther import borrowData 
 from utils.getDataFromItunes import itunesapi 
 
@@ -25,17 +26,54 @@ class Data:
 
         #itunes api
         if data.album_name:
-           itunesapi.getInfoByAlbumName(data.album_name, data.country) 
+            DEBUG.p('start get %s infos...' % (data.album_name))
+            infos = itunesapi.getInfoByAlbumName(data.album_name, data.country) 
+        else:
+            DEBUG.p("empty album name!")
+            infos = [{
+                'album_name': '',
+                'artist': '',
+                'year_record': '12345',
+                'music_contain': 'Nothing',
+                'path': u'static/images/onePiece.png',
+                'cover_name_1200': u'onePiece.png',
+                'cover_name_170': u'onePiece.png',
+                'cover_name_100': u'onePiece.png',
+                'copy_right': u'lewis',
+                'track_count': 1,
+                'width': 0,
+                'height': 0,
+                'size': 0,
+                'format': 'png',
+                'des':'come on boy!!! day day up!!!',
+                'url': ''},
+                {'album_name': '',
+                'artist': '',
+                'year_record': '12345',
+                'music_contain': 'Nothing',
+                'path': u'static/images/onePiece.png',
+                'cover_name_1200': u'onePiece.png',
+                'cover_name_170': u'onePiece.png',
+                'cover_name_100': u'onePiece.png',
+                'copy_right': u'lewis',
+                'track_count': 1,
+                'width': 0,
+                'height': 0,
+                'size': 0,
+                'format': 'png',
+                'des':'come on boy!!! day day up!!!',
+                'url': ''
+            }]
+        return self.render.coverShow(infos)
 
-        return 'ok'
-
+    #use mysql
     def POST_old(self):
         data = web.input(path={}) 
 
         coverPath = ''
         needMv = 0
         if data.coverurl:
-            print data.coverurl
+            DEBUG.p(data.coverurl)
             coverPath = borrowData.getAlbumImageFromUrl(data.coverurl) 
             if len(coverPath) <= 0:
                return 'sorry, get image failed...'

@@ -4,6 +4,8 @@ import re
 import urllib2
 import urllib
 import json
+import DEBUG
+from controllers.model import dao
 
 #itunes seach api:
 #http://www.apple.com/itunes/affiliates/resources/documentation/itunes-store-web-service-search-api.htmlhttp://www.apple.com/itunes/affiliates/resources/documentation/itunes-store-web-service-search-api.html
@@ -82,73 +84,221 @@ import json
 #    "primaryGenreName":"Mandopop"
 #}
 
+#https://itunes.apple.com/search?term=Rammstein&country=us&media=music&entity=musicArtist
+#{
+#    "wrapperType":"artist",
+#    "artistType":"Artist",
+#    "artistName":"Rammstein",
+#    "artistLinkUrl":"https://itunes.apple.com/us/artist/rammstein/id408932?uo=4",
+#    "artistId":408932,
+#    "amgArtistId":198625,
+#    "primaryGenreName":"Rock",
+#    "primaryGenreId":21,
+#    "radioStationUrl":"https://itunes.apple.com/station/idra.408932"
+#}
+
+#https://itunes.apple.com/search?term=Rammstein&country=us&media=music&entity=albumName
+#{
+#    "wrapperType":"collection",
+#    "collectionType":"Album",
+#    "artistId":408932,
+#    "collectionId":368317231,
+#    "amgArtistId":198625,
+#    "artistName":"Rammstein",
+#    "collectionName":"Sehnsucht",
+#    "collectionCensoredName":"Sehnsucht",
+#    "artistViewUrl":"https://itunes.apple.com/us/artist/rammstein/id408932?uo=4",
+#    "collectionViewUrl":"https://itunes.apple.com/us/album/sehnsucht/id368317231?uo=4#",
+#    "artworkUrl60":"http://a5.mzstatic.com/us/r30/Music/58/b3/d8/mzi.nncogslg.60x60-50.jpg",
+#    "artworkUrl100":"http://a4.mzstatic.com/us/r30/Music/58/b3/d8/mzi.nncogslg.100x100-75.jpg",
+#    "collectionPrice":7.99,
+#    "collectionExplicitness":"notExplicit",
+#    "trackCount":11,
+#    "copyright":"????1997 Universal Music Domestic Rock/Urban, a division of Universal Music GmbH",
+#    "country":"USA",
+#    "currency":"USD",
+#    "releaseDate":"2010-02-05T08:00:00Z",
+#    "primaryGenreName":"Rock"
+#}
+
 class ItunesAPI:
     def __init__(self):
         self.baseUrl = 'https://itunes.apple.com/search?'
 
-    def getResponeResult(self, url):
-        self.url = url
-        login_data = urllib.urlencode({})
-        login_headers = {'Referer':url, 'User-Agent':'Opera/9.60',}
-        login_request = urllib2.Request(url, login_data, login_headers)
-        result = urllib2.urlopen(login_request).read()
-        return json.loads(result.decode("utf-8"))['results']
+    def __getResponeResult(self, url):
+        try:
+            login_data = urllib.urlencode({})
+            login_headers = {'Referer':url, 'User-Agent':'Opera/9.60',}
+            login_request = urllib2.Request(url, login_data, login_headers)
+            result = urllib2.urlopen(login_request).read()
+            return json.loads(result.decode("utf-8"))['results']
+        except:
+            DEBUG.p('get data failed, and try again...')
+            try:
+                login_data = urllib.urlencode({})
+                login_headers = {'Referer':url, 'User-Agent':'Opera/9.60',}
+                login_request = urllib2.Request(url, login_data, login_headers)
+                result = urllib2.urlopen(login_request).read()
+                return json.loads(result.decode("utf-8"))['results']
+            except:
+                DEBUG.p('err: get data failed from: %s' % (url))
+                result = []
+                return result
 
-    def getInfoByAlbumName(self, albumName, country):
-        if not albumName:
-           print 'Please special the album name'
-           return false 
-        if not country:
-           print 'country undefine, use "us" as defaulted'
-           country = 'us'
+    def __saveCoverImage(self, album_dir, coverImageUrl):
+        try:
+            f = urllib2.urlopen(coverImageUrl)
+            with open(album_dir + '/' + coverImageUrl.split('/')[-1], 'wb') as code:
+                code.write(f.read())
+            DEBUG.p('%s Pic Saved!' % (coverImageUrl.split('/')[-1])) 
+        except:
+            DEBUG.p('%s Pic Saved failed! and try again...' % (coverImageUrl.split('/')[-1])) 
+            try:
+                f = urllib2.urlopen(coverImageUrl)
+                with open(album_dir + '/' + coverImageUrl.split('/')[-1], 'wb') as code:
+                    code.write(f.read())
+                DEBUG.p('%s Pic Saved!' % (coverImageUrl.split('/')[-1])) 
+            except:
+                DEBUG.p('err: %s Pic Saved failed!' % (coverImageUrl.split('/')[-1])) 
 
-        #get album info
-        url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album'%(albumName, country)
-        print url
-        jsonResultAlbum = self.getResponeResult(url)
-        print 'result count: %d'%(len(jsonResultAlbum))
-
+    def __getMusicLists(self, albumName, country):
         #get album musics info
         url = self.baseUrl + 'term=%s&country=%s&media=music'%(albumName, country)
-        print url
-        jsonResultMusic = self.getResponeResult(url)
-        print 'result count: %d'%(len(jsonResultMusic))
+        DEBUG.p(url)
+        jsonResultMusics = self.__getResponeResult(url)
+        DEBUG.p('result count: %d'%(len(jsonResultMusics)))
+        return jsonResultMusics
 
-        #save album info files 
-        artist_dir = os.getcwd() + '/static/images/' + jsonResultAlbum[0]['artistName'] 
-        album_dir = artist_dir + '/' + jsonResultAlbum[0]['collectionName'] 
+    def __saveAllInfos(self, jsonResultAlbum, country):
+        #prepare dir
+        artist_dir = os.getcwd() + '/static/images/' + jsonResultAlbum['artistName'] 
+        album_dir = artist_dir + '/' + jsonResultAlbum['collectionName'] 
         if not os.path.exists(artist_dir):
            os.makedirs(artist_dir)
         if not os.path.exists(album_dir):
            os.makedirs(album_dir)
+        else:
+           DEBUG.p('this album info exist!!!!')
+           result = dao.getById(jsonResultAlbum['artistName'], jsonResultAlbum['collectionName']) 
+           return
 
-        ##save info to json file
+        #save album info json file
         file = open(album_dir + "/album.json","w")
         json.dump(jsonResultAlbum, file)
-        file.close()
-        file = open(album_dir + "/album_musics.json","w")
-        json.dump(jsonResultMusic, file)
         file.close()
 
         
         ##save album cover images
-        coverImageUrl = jsonResultAlbum[0]['artworkUrl100']
-        f = urllib2.urlopen(coverImageUrl)
-        with open(album_dir + '/' + coverImageUrl.split('/')[-1], 'wb') as code:
-            code.write(f.read())
-        print('100 Pic Saved!') 
+        coverImageUrl = jsonResultAlbum['artworkUrl100']
+        self.__saveCoverImage(album_dir, coverImageUrl)
         coverImageUrl_170 = coverImageUrl.replace('100x100', '170x170')
-        f = urllib2.urlopen(coverImageUrl_170)
-        with open(album_dir + '/' + coverImageUrl_170.split('/')[-1], 'wb') as code:
-            code.write(f.read())
-        print('170 Pic Saved!') 
+        self.__saveCoverImage(album_dir, coverImageUrl_170)
         coverImageUrl_1200 = coverImageUrl.replace('100x100', '1200x1200')
-        f = urllib2.urlopen(coverImageUrl_1200)
-        with open(album_dir + '/' + coverImageUrl_1200.split('/')[-1], 'wb') as code:
-            code.write(f.read())
-        print('1200 Pic Saved!') 
+        self.__saveCoverImage(album_dir, coverImageUrl_1200)
+
+        info = {
+                'album_name': '',
+                'artist': '',
+                'year_record': '12345',
+                'music_contain': 'Nothing',
+                'path': u'static/images/',
+                'cover_name_1200': u'onePiece.png',
+                'cover_name_170': u'onePiece.png',
+                'cover_name_100': u'onePiece.png',
+                'copy_right': u'lewis',
+                'track_count': 1,
+                'width': 0,
+                'height': 0,
+                'size': 0,
+                'format': 'jpeg',
+                'des':'come on boy!!! day day up!!!',
+                'itunes_album_url': '',
+                'itunes_artist_url': ''
+        }
+        #DEBUG.pd(jsonResultAlbum)
+        info['path'] = album_dir + '/'
+        info['cover_name_1200'] = coverImageUrl_1200.split('/')[-1] 
+        info['cover_name_170'] = coverImageUrl_170.split('/')[-1] 
+        info['cover_name_100'] = coverImageUrl.split('/')[-1] 
+        info['album_name'] = jsonResultAlbum['collectionName'] 
+        info['artist'] = jsonResultAlbum['artistName'] 
+        info['cover_name'] = coverImageUrl_1200.split('/')[-1] 
+        info['year_record'] = jsonResultAlbum['releaseDate']
+        info['track_count'] = jsonResultAlbum['trackCount']
+        info['itunes_album_url'] = jsonResultAlbum['collectionViewUrl']
+        if jsonResultAlbum.has_key('artistViewUrl'): 
+           info['itunes_artist_url'] = jsonResultAlbum['artistViewUrl']
+        if jsonResultAlbum.has_key('copyright'): 
+           info['copy_right'] = jsonResultAlbum['copyright']
+
+        musicContains = []
+        jsonMusics = []
+        jsonResultMusics = self.__getMusicLists(jsonResultAlbum['collectionName'], country)
+        if len(jsonResultMusics) == jsonResultAlbum['trackCount']: 
+           for jsonResultMusic in jsonResultMusics:
+               musicContains.append(jsonResultMusic['trackName'])
+           jsonMusics = jsonResultMusics
+        else:
+            for jsonResultMusic in jsonResultMusics:
+                if jsonResultMusic['artistName'] == jsonResultAlbum['artistName']:
+                   musicContains.append(jsonResultMusic['trackName'])
+                   jsonMusics.append(jsonResultMusic)
+
+        #save music list json file
+        file = open(album_dir + "/album_musics.json","w")
+        json.dump(jsonMusics, file)
+        file.close()
+
+        info['music_contain'] = musicContains 
+        DEBUG.pd(info)
+
+        return info
+        
+    def getInfoByAlbumName(self, albumName, country):
+        if not albumName:
+           DEBUG.p('Please special the album name')
+           return false 
+        if not country:
+           DEBUG.p('country undefine, use "us" as defaulted')
+           country = 'us'
+
+        #get album info
+        url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album'%(albumName, country)
+        DEBUG.p(url)
+        jsonResultAlbums = self.__getResponeResult(url)
+        DEBUG.p('result count: %d'%(len(jsonResultAlbums)))
+
+        infos = []
+        for jsonResultAlbum in jsonResultAlbums:
+            ret = self.__saveAllInfos(jsonResultAlbum, country)
+            if not ret: 
+               continue
+            infos.append(ret) 
+            #enter db
+            dao.addOneDoc(ret)
+            #get all albums of the artist
+            url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album'%(jsonResultAlbum['artistName'], country)
+            DEBUG.p(url)
+            jsonAlbums = self.__getResponeResult(url)
+            DEBUG.p('result count: %d'%(len(jsonAlbums)))
+            for jsonAlbum in jsonAlbums:
+                #get album info
+                url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album'%(jsonAlbum['collectionName'], country)
+                DEBUG.p(url)
+                jsonResultAlbums2 = self.__getResponeResult(url)
+                DEBUG.p('result count: %d'%(len(jsonResultAlbums2)))
+                for jsonResultAlbum2 in jsonResultAlbums2:
+                    ret = self.__saveAllInfos(jsonResultAlbum2, country)
+                    if not ret:
+                       continue
+                    infos.append(ret) 
+                    #enter db
+                    dao.addOneDoc(ret)
+
+
+        return infos
 
 itunesapi = ItunesAPI()
 if __name__ == '__main__':
-    #json = api.getResponeResult('https://itunes.apple.com/search?term=%E5%AE%89%E5%92%8C%E6%A1%A5%E5%8C%97&country=tw&media=music&entity=album')
+    #json = api.__getResponeResult('https://itunes.apple.com/search?term=%E5%AE%89%E5%92%8C%E6%A1%A5%E5%8C%97&country=tw&media=music&entity=album')
     api.getInfoByAlbumName('Bigger, Better, Faster, More!', 'tw')
