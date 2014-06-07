@@ -9,17 +9,22 @@ class Test:
         self.render = settings.render 
 
     def GET(self):
-        info = {
-                'album_name': u'Bigger, Better, Faster, More!',
-                'artist': u'4 Non Blondes',
+        infos = [{
+                'album_name': '',
+                'artist': '',
                 'year_record': '12345',
-                'music_contain': '123456',
-                'path': u'static/images/4 Non Blondes/Bigger, Better, Faster, More!/dj.xhlljvup.1200x1200-75.jpg',
-                'name': u'dj.xhlljvup.1200x1200-75.jpg',
-                'width': 123,
-                'height': 123,
-                'size': 1234,
-                'format': 'jepg',
-                'des':'test test'
-        }
-        return self.render.coverShow(info)
+                'music_contain': 'Nothing',
+                'path': u'static/images/onePiece.png',
+                'cover_name_1200': u'onePiece.png',
+                'cover_name_170': u'onePiece.png',
+                'cover_name_100': u'onePiece.png',
+                'copy_right': u'lewis',
+                'track_count': 1,
+                'width': 0,
+                'height': 0,
+                'size': 0,
+                'format': 'png',
+                'des':'come on boy!!! day day up!!!',
+                'url': ''},
+                ]
+        return self.render.coverShow(infos)
