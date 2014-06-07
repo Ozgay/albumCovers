@@ -25,11 +25,21 @@ class Data:
         data = web.input(path={}) 
 
         #itunes api
-        if data.album_name:
-            DEBUG.p('start get %s infos...' % (data.album_name))
-            infos = itunesapi.getInfoByAlbumName(data.album_name, data.country) 
+        if data.album_name or data.artist_name:
+            if data.country == 'deep' and data.album_name:
+               DEBUG.p('get deep creep: %s' % (data.album_name))
+               infos = itunesapi.getInfosWithAlbumName_deep(data.album_name, None) 
+            elif data.album_name and data.artist_name:
+               DEBUG.p('get %s by %s' % (data.album_name, data.artist_name))
+               infos = itunesapi.getInfosWithAlbumNameAndArtistName(data.album_name, data.artist_name, data.country)
+            elif data.album_name: 
+               DEBUG.p('get album: %s' % (data.album_name))
+               infos = itunesapi.getInfosWithAlbumName(data.album_name, data.country) 
+            elif data.artist_name: 
+               DEBUG.p('get album by %s' % (data.artist_name))
+               infos = itunesapi.getInfosWithArtistName(data.artist_name, data.country) 
         else:
-            DEBUG.p("empty album name!")
+            DEBUG.p("empty album name or drtist name!")
             infos = [{
                 'album_name': '',
                 'artist': '',

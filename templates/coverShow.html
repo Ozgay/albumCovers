@@ -4,8 +4,8 @@ $:render.header()
 $for coverInfo in coverInfos:
     <img src="$config.static/images/$coverInfo['artist']/$coverInfo['album_name']/$coverInfo['cover_name_1200']"></img>
     <br>
-    <h1>$coverInfo['album_name']</h2>
-    <h3>$coverInfo['artist']</h3>
+    <h1>$coverInfo['album_name']<small> album</small></h2>
+    <h3>$coverInfo['artist']<small> artist</small></h3>
     <h4>$coverInfo['des']</h4>
 
 $:render.foot()

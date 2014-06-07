@@ -180,7 +180,8 @@ class ItunesAPI:
         else:
            DEBUG.p('this album info exist!!!!')
            result = dao.getById(jsonResultAlbum['artistName'], jsonResultAlbum['collectionName']) 
-           return
+           DEBUG.pd(result)
+           return result 
 
         #save album info json file
         file = open(album_dir + "/album.json","w")
@@ -252,9 +253,12 @@ class ItunesAPI:
         info['music_contain'] = musicContains 
         DEBUG.pd(info)
 
+        #record info into db
+        dao.addOneDoc(info)
+
         return info
         
-    def getInfoByAlbumName(self, albumName, country):
+    def __getInfoByAlbumName(self, albumName, country):
         if not albumName:
            DEBUG.p('Please special the album name')
            return false 
@@ -262,43 +266,135 @@ class ItunesAPI:
            DEBUG.p('country undefine, use "us" as defaulted')
            country = 'us'
 
-        #get album info
         url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album'%(albumName, country)
         DEBUG.p(url)
         jsonResultAlbums = self.__getResponeResult(url)
         DEBUG.p('result count: %d'%(len(jsonResultAlbums)))
+        return jsonResultAlbums
 
+    def __getInfoByArtistName(self, artistName, country):
+        if not artistName:
+           DEBUG.p('Please special the artist name')
+           return false 
+        if not country:
+           DEBUG.p('country undefine, use "us" as defaulted')
+           country = 'us'
+
+        url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album'%(artistName, country)
+        DEBUG.p(url)
+        jsonResultAlbums = self.__getResponeResult(url)
+        DEBUG.p('result count: %d'%(len(jsonResultAlbums)))
+        return jsonResultAlbums
+
+    def getInfosWithAritstName_deep(self, aritstName, country):
         infos = []
+        #get all albums of the artist
+        jsonResultAlbums = self.__getInfoByArtistName(aritstName, country)
         for jsonResultAlbum in jsonResultAlbums:
             ret = self.__saveAllInfos(jsonResultAlbum, country)
             if not ret: 
                continue
             infos.append(ret) 
             #enter db
-            dao.addOneDoc(ret)
+
+            #get all albums of other artist
+            if jsonResultAlbum['artistName'] != artistName:
+                    jsonAlbums = self.__getInfoByArtistName(jsonResultAlbum['artistName'], country)
+                    for jsonAlbum in jsonAlbums:
+                        ret = self.__saveAllInfos(jsonAlbum, country)
+                        if not ret:
+                           continue
+                        infos.append(ret) 
+
+                        jsonResultAlbums2 = self.__getInfoByAlbumName(jsonAlbum['collectionName'], country)
+                        for jsonResultAlbum2 in jsonResultAlbums2:
+                            ret = self.__saveAllInfos(jsonResultAlbum2, country)
+                            if not ret:
+                               continue
+                            infos.append(ret) 
+
+                            jsonAlbums2 = self.__getInfoByArtistName(jsonResultAlbum2['artistName'], country)
+                            for jsonAlbum2 in jsonAlbums2:
+                                ret = self.__saveAllInfos(jsonAlbum2, country)
+                                if not ret:
+                                   continue
+                                infos.append(ret) 
+
+        return infos
+
+    def getInfosWithArtistName(self, aritstName, country):
+        infos = []
+        #get all albums of the artist
+        jsonResultAlbums = self.__getInfoByArtistName(aritstName, country)
+        for jsonResultAlbum in jsonResultAlbums:
+            ret = self.__saveAllInfos(jsonResultAlbum, country)
+            if not ret: 
+               continue
+            infos.append(ret) 
+
+        return infos
+
+    def getInfosWithAlbumName_deep(self, albumName, country):
+        infos = []
+        #get all albums of name 'albumName' 
+        jsonResultAlbums = self.__getInfoByAlbumName(albumName, country)
+        for jsonResultAlbum in jsonResultAlbums:
+            ret = self.__saveAllInfos(jsonResultAlbum, country)
+            if not ret: 
+               continue
+            infos.append(ret) 
+
             #get all albums of the artist
-            url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album'%(jsonResultAlbum['artistName'], country)
-            DEBUG.p(url)
-            jsonAlbums = self.__getResponeResult(url)
-            DEBUG.p('result count: %d'%(len(jsonAlbums)))
+            jsonAlbums = self.__getInfoByArtistName(jsonResultAlbum['artistName'], country)
             for jsonAlbum in jsonAlbums:
-                #get album info
-                url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album'%(jsonAlbum['collectionName'], country)
-                DEBUG.p(url)
-                jsonResultAlbums2 = self.__getResponeResult(url)
-                DEBUG.p('result count: %d'%(len(jsonResultAlbums2)))
+                ret = self.__saveAllInfos(jsonAlbum, country)
+                if not ret:
+                   continue
+                infos.append(ret) 
+
+                jsonResultAlbums2 = self.__getInfoByAlbumName(jsonAlbum['collectionName'], country)
                 for jsonResultAlbum2 in jsonResultAlbums2:
                     ret = self.__saveAllInfos(jsonResultAlbum2, country)
                     if not ret:
                        continue
                     infos.append(ret) 
-                    #enter db
-                    dao.addOneDoc(ret)
 
+                    jsonAlbums2 = self.__getInfoByArtistName(jsonResultAlbum2['artistName'], country)
+                    for jsonAlbum2 in jsonAlbums2:
+                        ret = self.__saveAllInfos(jsonAlbum2, country)
+                        if not ret:
+                           continue
+                        infos.append(ret) 
 
         return infos
+
+    def getInfosWithAlbumName(self, albumName, country):
+        infos = []
+        #get all albums of name 'albumName' 
+        jsonResultAlbums = self.__getInfoByAlbumName(albumName, country)
+        for jsonResultAlbum in jsonResultAlbums:
+            ret = self.__saveAllInfos(jsonResultAlbum, country)
+            if not ret: 
+               continue
+            infos.append(ret) 
+
+        return infos
+
+    def getInfosWithAlbumNameAndArtistName(self, albumName, artistName, country):
+        infos = []
+        #get all albums of name 'albumName' 
+        jsonResultAlbums = self.__getInfoByArtistName(artistName, country)
+        for jsonResultAlbum in jsonResultAlbums:
+            if jsonResultAlbum['collectionName'] == albumName:
+                    ret = self.__saveAllInfos(jsonResultAlbum, country)
+                    if not ret: 
+                       continue
+                    infos.append(ret) 
+
+        return infos
+
 
 itunesapi = ItunesAPI()
 if __name__ == '__main__':
     #json = api.__getResponeResult('https://itunes.apple.com/search?term=%E5%AE%89%E5%92%8C%E6%A1%A5%E5%8C%97&country=tw&media=music&entity=album')
-    api.getInfoByAlbumName('Bigger, Better, Faster, More!', 'tw')
+    api.__getInfoByAlbumName('Bigger, Better, Faster, More!', 'tw')

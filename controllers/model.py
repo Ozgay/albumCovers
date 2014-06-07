@@ -48,8 +48,16 @@ class Model:
         self.__db[self.__db_name['cover']].delete(doc)
     
     def getById(self, artist, albumName):
-        keyStr = '%s:%s'%(doc['artist'], doc['album_name']) 
-        return  self.__db[self.__db_name['cover']](keyStr.encode('ascii', 'ignore'))
+        keyStr = '%s:%s'%(artist, albumName) 
+        _id = hashlib.md5(keyStr.encode('ascii', 'ignore')).hexdigest()
+        map_fun = '''function(doc) {
+             if (doc._id == '%s')
+                 emit(doc, null);
+                 }''' % (_id)
+        albums = self.__db[self.__db_name['cover']].query(map_fun)
+        for album in albums: 
+            return album.key 
+        return None
         
 
 dao = Model()
