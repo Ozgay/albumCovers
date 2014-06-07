@@ -286,10 +286,17 @@ class ItunesAPI:
         DEBUG.p('result count: %d'%(len(jsonResultAlbums)))
         return jsonResultAlbums
 
-    def getInfosWithAritstName_deep(self, aritstName, country):
+    def getInfosWithAritstName_deep(self, artistName, country):
+        if not artistName:
+           DEBUG.p('Please special the artist name')
+           return false 
+        if not country:
+           DEBUG.p('country undefine, use "us" as defaulted')
+           country = 'us'
+
         infos = []
         #get all albums of the artist
-        jsonResultAlbums = self.__getInfoByArtistName(aritstName, country)
+        jsonResultAlbums = self.__getInfoByArtistName(artistName, country)
         for jsonResultAlbum in jsonResultAlbums:
             ret = self.__saveAllInfos(jsonResultAlbum, country)
             if not ret: 
@@ -322,10 +329,17 @@ class ItunesAPI:
 
         return infos
 
-    def getInfosWithArtistName(self, aritstName, country):
+    def getInfosWithArtistName(self, artistName, country):
+        if not artistName:
+           DEBUG.p('Please special the artist name')
+           return false 
+        if not country:
+           DEBUG.p('country undefine, use "us" as defaulted')
+           country = 'us'
+
         infos = []
         #get all albums of the artist
-        jsonResultAlbums = self.__getInfoByArtistName(aritstName, country)
+        jsonResultAlbums = self.__getInfoByArtistName(artistName, country)
         for jsonResultAlbum in jsonResultAlbums:
             ret = self.__saveAllInfos(jsonResultAlbum, country)
             if not ret: 
@@ -335,6 +349,13 @@ class ItunesAPI:
         return infos
 
     def getInfosWithAlbumName_deep(self, albumName, country):
+        if not albumName:
+           DEBUG.p('Please special the album name')
+           return false 
+        if not country:
+           DEBUG.p('country undefine, use "us" as defaulted')
+           country = 'us'
+
         infos = []
         #get all albums of name 'albumName' 
         jsonResultAlbums = self.__getInfoByAlbumName(albumName, country)
@@ -369,6 +390,13 @@ class ItunesAPI:
         return infos
 
     def getInfosWithAlbumName(self, albumName, country):
+        if not albumName:
+           DEBUG.p('Please special the album name')
+           return false 
+        if not country:
+           DEBUG.p('country undefine, use "us" as defaulted')
+           country = 'us'
+
         infos = []
         #get all albums of name 'albumName' 
         jsonResultAlbums = self.__getInfoByAlbumName(albumName, country)
@@ -381,6 +409,13 @@ class ItunesAPI:
         return infos
 
     def getInfosWithAlbumNameAndArtistName(self, albumName, artistName, country):
+        if not albumName and not artistName:
+           DEBUG.p('Please special the album name and artist name')
+           return false 
+        if not country:
+           DEBUG.p('country undefine, use "us" as defaulted')
+           country = 'us'
+
         infos = []
         #get all albums of name 'albumName' 
         jsonResultAlbums = self.__getInfoByArtistName(artistName, country)
