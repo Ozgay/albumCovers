@@ -171,8 +171,17 @@ class ItunesAPI:
 
     def __saveAllInfos(self, jsonResultAlbum, country):
         #prepare dir
-        artist_dir = os.getcwd() + '/static/images/' + jsonResultAlbum['artistName'] 
-        album_dir = artist_dir + '/' + jsonResultAlbum['collectionName'] 
+        dir_len = len(jsonResultAlbum['artistName'])
+        if dir_len > 255:
+            artist_dir = os.getcwd() + '/static/images/' + jsonResultAlbum['artistName'][0:254]
+        else:
+            artist_dir = os.getcwd() + '/static/images/' + jsonResultAlbum['artistName']
+        dir_len = len(jsonResultAlbum['collectionName'])
+        if dir_len > 255:
+            album_dir = artist_dir + '/' + jsonResultAlbum['collectionName'][0:254]
+        else:
+            album_dir = artist_dir + '/' + jsonResultAlbum['collectionName']
+
         if not os.path.exists(artist_dir):
            os.makedirs(artist_dir)
         if not os.path.exists(album_dir):
