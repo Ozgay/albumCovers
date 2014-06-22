@@ -23,21 +23,23 @@ class Data:
 
     def POST(self):
         data = web.input(path={}) 
+        if data.limit:
+           limit = int(data.limit)
 
         #itunes api
         if data.album_name or data.artist_name:
             if data.country == 'deep' and data.album_name:
                DEBUG.p('get deep creep: %s' % (data.album_name))
-               infos = itunesapi.getInfosWithAlbumName_deep(data.album_name, None) 
+               infos = itunesapi.getInfosWithAlbumName_deep(data.album_name, None, data.limit)
             elif data.album_name and data.artist_name:
                DEBUG.p('get %s by %s' % (data.album_name, data.artist_name))
-               infos = itunesapi.getInfosWithAlbumNameAndArtistName(data.album_name, data.artist_name, data.country)
+               infos = itunesapi.getInfosWithAlbumNameAndArtistName(data.album_name, data.artist_name, data.country, data.limit)
             elif data.album_name: 
                DEBUG.p('get album: %s' % (data.album_name))
-               infos = itunesapi.getInfosWithAlbumName(data.album_name, data.country) 
+               infos = itunesapi.getInfosWithAlbumName(data.album_name, data.country, data.limit)
             elif data.artist_name: 
                DEBUG.p('get album by %s' % (data.artist_name))
-               infos = itunesapi.getInfosWithArtistName(data.artist_name, data.country) 
+               infos = itunesapi.getInfosWithArtistName(data.artist_name, data.country, data.limit)
         else:
             DEBUG.p("empty album name or drtist name!")
             infos = [{

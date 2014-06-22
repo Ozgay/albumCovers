@@ -124,6 +124,7 @@ from controllers.model import dao
 class ItunesAPI:
     def __init__(self):
         self.baseUrl = 'https://itunes.apple.com/search?'
+        self.limit = 50
 
     def __getResponeResult(self, url):
         try:
@@ -160,14 +161,6 @@ class ItunesAPI:
                 DEBUG.p('%s Pic Saved!' % (coverImageUrl.split('/')[-1])) 
             except:
                 DEBUG.p('err: %s Pic Saved failed!' % (coverImageUrl.split('/')[-1])) 
-
-    def __getMusicLists(self, albumName, country):
-        #get album musics info
-        url = self.baseUrl + 'term=%s&country=%s&media=music'%(albumName, country)
-        DEBUG.p(url)
-        jsonResultMusics = self.__getResponeResult(url)
-        DEBUG.p('result count: %d'%(len(jsonResultMusics)))
-        return jsonResultMusics
 
     def __saveAllInfos(self, jsonResultAlbum, country):
         #prepare dir
@@ -266,6 +259,13 @@ class ItunesAPI:
         dao.addOneDoc(info)
 
         return info
+    def __getMusicLists(self, albumName, country):
+        #get album musics info
+        url = self.baseUrl + 'term=%s&country=%s&media=music&limit=%d'%(albumName, country, self.limit)
+        DEBUG.p(url)
+        jsonResultMusics = self.__getResponeResult(url)
+        DEBUG.p('result count: %d'%(len(jsonResultMusics)))
+        return jsonResultMusics
         
     def __getInfoByAlbumName(self, albumName, country):
         if not albumName:
@@ -275,7 +275,7 @@ class ItunesAPI:
            DEBUG.p('country undefine, use "us" as defaulted')
            country = 'us'
 
-        url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album'%(albumName, country)
+        url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album&limit=%d'%(albumName, country, self.limit)
         DEBUG.p(url)
         jsonResultAlbums = self.__getResponeResult(url)
         DEBUG.p('result count: %d'%(len(jsonResultAlbums)))
@@ -289,19 +289,21 @@ class ItunesAPI:
            DEBUG.p('country undefine, use "us" as defaulted')
            country = 'us'
 
-        url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album'%(artistName, country)
+        url = self.baseUrl + 'term=%s&country=%s&media=music&entity=album&limit=%d'%(artistName, country, self.limit)
         DEBUG.p(url)
         jsonResultAlbums = self.__getResponeResult(url)
         DEBUG.p('result count: %d'%(len(jsonResultAlbums)))
         return jsonResultAlbums
 
-    def getInfosWithAritstName_deep(self, artistName, country):
+    def getInfosWithAritstName_deep(self, artistName, country, limit = 50):
         if not artistName:
            DEBUG.p('Please special the artist name')
            return false 
         if not country:
            DEBUG.p('country undefine, use "us" as defaulted')
            country = 'us'
+        if limit != 50:
+           self.limit = int(limit)
 
         infos = []
         #get all albums of the artist
@@ -338,13 +340,15 @@ class ItunesAPI:
 
         return infos
 
-    def getInfosWithArtistName(self, artistName, country):
+    def getInfosWithArtistName(self, artistName, country, limit = 50):
         if not artistName:
            DEBUG.p('Please special the artist name')
            return false 
         if not country:
            DEBUG.p('country undefine, use "us" as defaulted')
            country = 'us'
+        if limit != 50:
+           self.limit = int(limit)
 
         infos = []
         #get all albums of the artist
@@ -357,13 +361,15 @@ class ItunesAPI:
 
         return infos
 
-    def getInfosWithAlbumName_deep(self, albumName, country):
+    def getInfosWithAlbumName_deep(self, albumName, country, limit = 50):
         if not albumName:
            DEBUG.p('Please special the album name')
            return false 
         if not country:
            DEBUG.p('country undefine, use "us" as defaulted')
            country = 'us'
+        if limit != 50:
+           self.limit = int(limit)
 
         infos = []
         #get all albums of name 'albumName' 
@@ -398,13 +404,15 @@ class ItunesAPI:
 
         return infos
 
-    def getInfosWithAlbumName(self, albumName, country):
+    def getInfosWithAlbumName(self, albumName, country, limit = 50):
         if not albumName:
            DEBUG.p('Please special the album name')
            return false 
         if not country:
            DEBUG.p('country undefine, use "us" as defaulted')
            country = 'us'
+        if limit != 50:
+           self.limit = int(limit)
 
         infos = []
         #get all albums of name 'albumName' 
@@ -417,13 +425,15 @@ class ItunesAPI:
 
         return infos
 
-    def getInfosWithAlbumNameAndArtistName(self, albumName, artistName, country):
+    def getInfosWithAlbumNameAndArtistName(self, albumName, artistName, country, limit = 50):
         if not albumName and not artistName:
            DEBUG.p('Please special the album name and artist name')
            return false 
         if not country:
            DEBUG.p('country undefine, use "us" as defaulted')
            country = 'us'
+        if limit != 50:
+           self.limit = int(limit)
 
         infos = []
         #get all albums of name 'albumName' 
