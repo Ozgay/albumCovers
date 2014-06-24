@@ -1,6 +1,7 @@
 #coding: UTF-8
 import couchdb
 import hashlib
+import random
 import DEBUG 
 from couchdb.client import Server
 from config import settings
@@ -37,6 +38,9 @@ class Model:
            print 'database %s doeso not exist!!!'%(dbname)
 
         self.__db[v] = self.__server.create(dbname)
+
+    def getAllDoc(self):
+        return self.__db[self.__db_name['cover']] 
         
     def addOneDoc(self, doc):
         keyStr = '%s:%s'%(doc['artist'], doc['album_name']) 
@@ -58,7 +62,58 @@ class Model:
         for album in albums: 
             return album.key 
         return None
-        
+
+    def getByKeyValue(self, key, value):
+        map_fun = '''function(doc) {
+             if (doc.%s == '%s')
+                 emit(doc, null);
+                 }''' % (key, value)
+        albums = self.__db[self.__db_name['cover']].query(map_fun)
+        for album in albums: 
+            return album.key 
+        return None
+
+    def getByArtist(self, artist):
+        map_fun = '''function(doc) {
+             if (doc.artist == '%s')
+                 emit(doc, null);
+                 }''' % (artist)
+        albums = self.__db[self.__db_name['cover']].query(map_fun)
+        for album in albums: 
+            return album.key 
+        return None
+
+    def getByAbbumName(self, albumName):
+        map_fun = '''function(doc) {
+             if (doc.album_name == '%s')
+                 emit(doc, null);
+                 }''' % (albumName)
+        albums = self.__db[self.__db_name['cover']].query(map_fun)
+        for album in albums: 
+            return album.key 
+        return None
+
+    def getByCopyRight(self, copyRight):
+        map_fun = '''function(doc) {
+             if (doc.copy_right == '%s')
+                 emit(doc, null);
+                 }''' % (copyRight)
+        albums = self.__db[self.__db_name['cover']].query(map_fun)
+        for album in albums: 
+            return album.key 
+        return None
+
+    def getRandom(self, seed = 11):
+        db = self.getAllDoc()    
+        tenNews = [] 
+        for id in db:
+            rd = random.randint(0, seed)
+            if rd != 5:
+               continue
+            if len(tenNews) < 10:
+               print db[id]
+               tenNews.append(db[id])
+        return tenNews
 
 dao = Model()
 if __name__ == '__main__':
