@@ -1,6 +1,7 @@
 # coding: UTF-8
 import web
 import os
+from model import dao
 
 from config import settings
 
@@ -27,4 +28,5 @@ class Test:
                 'des':'come on boy!!! day day up!!!',
                 'url': ''},
                 ]
-        return self.render.coverShow(infos)
+        infos = dao.getRandom(100)
+        return self.render.coverShow2(infos)

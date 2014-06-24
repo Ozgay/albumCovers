@@ -31,6 +31,9 @@ class Data:
             if data.country == 'deep' and data.album_name:
                DEBUG.p('get deep creep: %s' % (data.album_name))
                infos = itunesapi.getInfosWithAlbumName_deep(data.album_name, None, data.limit)
+            elif data.country == 'deep' and data.artist_name:
+               DEBUG.p('get deep creep: %s' % (data.artist_name))
+               infos = itunesapi.getInfosWithAritstName_deep(data.artist_name, None, data.limit)
             elif data.album_name and data.artist_name:
                DEBUG.p('get %s by %s' % (data.album_name, data.artist_name))
                infos = itunesapi.getInfosWithAlbumNameAndArtistName(data.album_name, data.artist_name, data.country, data.limit)

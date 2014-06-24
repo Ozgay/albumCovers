@@ -3,30 +3,41 @@ $:render.header()
 
 <div class="container">
 $for coverInfo in coverInfos:
-     <hr class="featurette-divider">
-
+     <hr>
      <div class="row">
+     $if loop.odd:
          <div class="span6">
             <img class="img-rounded" src="$config.static/images/$coverInfo['artist']/$coverInfo['album_name']/$coverInfo['cover_name_1200']"></img>
          </div>
          <div class="span6">
-            <h2 class="featurette-heading">First featurette headling. <span class="muted">It'll blow your mind.</span></h2>
-            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+            <h4><small>album <i class="icon-hand-right"></i></small> $coverInfo['album_name']</h4>
+            <br>
+            <h4><small>artist <i class="icon-hand-right"></i></small> $coverInfo['artist']</h4>
+            <br>
+            <p style="font-size:16px;"><span class="muted">info <i class="icon-hand-right"></i></span>  $coverInfo['des']</p>
+            <span class="muted">music contain <i class="icon-hand-down"></i></span>
+            <ol>
+            $for music in coverInfo['music_contain']:
+                 <li>$music</li>
+            </ol>
          </div>
-     </div>
-
-     <hr class="featurette-divider">
-
-     <div class="row">
+     $if loop.even:
          <div class="span6">
-            <h2 class="featurette-heading">First featurette headling. <span class="muted">It'll blow your mind.</span></h2>
-            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+            <h4><small>album <i class="icon-hand-right"></i></small> $coverInfo['album_name']</h4>
+            <br>
+            <h4><small>artist <i class="icon-hand-right"></i></small> $coverInfo['artist']</h4>
+            <br>
+            <p style="font-size:16px;"><span class="muted">what's up <i class="icon-hand-right"></i></span>  $coverInfo['des']</p>
+            <span class="muted">music contain <i class="icon-hand-down"></i></span>
+            <ol>
+            $for music in coverInfo['music_contain']:
+                 <li>$music</li>
+            </ol>
          </div>
          <div class="span6">
             <img class="img-rounded" src="$config.static/images/$coverInfo['artist']/$coverInfo['album_name']/$coverInfo['cover_name_1200']"></img>
          </div>
      </div>
-
 </div><!-- /.container -->
 
 $:render.foot()
