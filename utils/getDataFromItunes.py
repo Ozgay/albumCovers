@@ -196,6 +196,8 @@ class ItunesAPI:
         self.__saveCoverImage(album_dir, coverImageUrl)
         coverImageUrl_170 = coverImageUrl.replace('100x100', '170x170')
         self.__saveCoverImage(album_dir, coverImageUrl_170)
+        coverImageUrl_600 = coverImageUrl.replace('100x100', '600x600')
+        self.__saveCoverImage(album_dir, coverImageUrl_600)
         coverImageUrl_1200 = coverImageUrl.replace('100x100', '1200x1200')
         self.__saveCoverImage(album_dir, coverImageUrl_1200)
 
