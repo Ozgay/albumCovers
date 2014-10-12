@@ -162,7 +162,7 @@ class ItunesAPI:
         except:
             DEBUG.p('%s Pic Saved failed! and try again...' % (coverImageUrl.split('/')[-1])) 
             try:
-                data = urllib2.urlopen(coverImageUrl, data=None, timeout=30).read()
+                data = urllib2.urlopen(coverImageUrl, data=None, timeout=40).read()
                 DEBUG.p('got data:') 
                 f = open(album_dir + '/' + coverImageUrl.split('/')[-1], 'wb')
                 f.write(data)
@@ -172,7 +172,8 @@ class ItunesAPI:
             except:
                 DEBUG.p('err: %s Pic Saved failed!' % (coverImageUrl.split('/')[-1])) 
                 #remove failed-file
-                os.remove(album_dir + '/' + coverImageUrl.split('/')[-1])
+                if os.path.exists(album_dir + '/' + coverImageUrl.split('/')[-1]):
+                    os.remove(album_dir + '/' + coverImageUrl.split('/')[-1])
                 f = open(album_dir + '/' + coverImageUrl.split('/')[-1] + ".failed", "w")
                 f.close()
                 return 0 
