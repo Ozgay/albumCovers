@@ -176,6 +176,10 @@ class ItunesAPI:
                     os.remove(album_dir + '/' + coverImageUrl.split('/')[-1])
                 f = open(album_dir + '/' + coverImageUrl.split('/')[-1] + ".failed", "w")
                 f.close()
+                #save music url into json file
+                file = open(os.getcwd() + '/static/failed_url',"ab")
+                json.dump((coverImageUrl,album_dir), file)
+                file.close()
                 return 0 
 
     def __saveAllInfos(self, jsonResultAlbum, country):
@@ -307,7 +311,7 @@ class ItunesAPI:
     def __getMusicLists(self, albumName, country):
         #get album musics info
         url = self.baseUrl + 'term=%s&country=%s&media=music&limit=%d'%(albumName, country, self.limit)
-        DEBUG.p(url)
+        #DEBUG.p(url)
         jsonResultMusics = self.__getResponeResult(url)
         DEBUG.p('result count: %d'%(len(jsonResultMusics)))
         return jsonResultMusics

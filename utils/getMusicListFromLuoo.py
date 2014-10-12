@@ -2,6 +2,7 @@
 import sys, os
 sys.path.append('/home/lewis/lulu/albumCovers/')
 import urllib2
+import urllib
 import json
 import re
 sys.path.append('/home/lewis/lulu/albumCovers/utils/')
@@ -166,10 +167,20 @@ country_code = [
     ['zw', 'Zimbabwe'],
 ]
 
-luooUrl = 'http://www.luoo.net/music/'
+album_ids = [
+    '21866889',
+    '19362263',
+    '31797077',
+    '29234675',
+    '21539774',
+    '27311505',
+]
+
+luooURL = 'http://www.luoo.net/music/'
+xiamiURL = 'http://www.xiami.com/collect/'
 
 def getMusicListFromLuoo(vol):
-    page = urllib2.urlopen(luooUrl + '%d'%(vol)).read()
+    page = urllib2.urlopen(luooURL + '%d'%(vol)).read()
     matchs = re.findall(r'<p class="name">(.*?)</p>\n\t\t\t\t\t\t\t\t\t\t<p class="artist">Artist: (.*?)</p>\n\t\t\t\t\t\t\t\t\t\t<p class="album">Album: (.*?)</p>', page, re.S)
     jsonFile = os.getcwd() + '/tmp/VOL%d.json'%(vol)
     list = [] 
@@ -243,6 +254,29 @@ def getInfoByJsonFile(vol):
     ##remove origin VOLx.json
     #os.remove(jsonFile)
     
+def getMusicListFromxiamiAlbum(album_id):
+    url = xiamiURL + album_id
+    login_data = urllib.urlencode({})
+    login_headers = {'Referer':url, 'User-Agent':'Opera/9.60',}
+    login_request = urllib2.Request(url, login_data, login_headers)
+    page = urllib2.urlopen(login_request, data=None, timeout=30).read()
+    album_page_filter = '<a href="/song/(.*?)" title="(.*?)"> (.*?) </a> -- (.*?)<a href="(.*?)" title="(.*?)">(.*?)</a>'
+   
+    matchs = re.findall(album_page_filter, page, re.S)
+    jsonFile = os.getcwd() + '/tmp/xiami_album_%s.json'%(album_id)
+    list = [] 
+    if matchs:
+        nu = len(matchs)
+        for match in matchs:
+            list.append((match[2], match[6]))
+        #save music list into json file
+        file = open(jsonFile,"w")
+        json.dump(list, file)
+        file.close()
+    else:
+        print u'get music lists failed!!!!'
+
+    return list
 
 if __name__ == '__main__':
    #1-625
@@ -251,3 +285,5 @@ if __name__ == '__main__':
        #getMusicListFromLuoo(i)
        getInfoByJsonFile(i)
        
+    #for i in album_ids:
+    #    getMusicListFromxiamiAlbum(i)
