@@ -195,18 +195,21 @@ class ItunesAPI:
         if not os.path.exists(album_dir):
            os.makedirs(album_dir)
         else:
-           DEBUG.p('this album:%s info exist!!!!'%(album_dir))
+           DEBUG.p('this album dir exist:%s'%(album_dir))
            result = dao.getById(jsonResultAlbum['artistName'], jsonResultAlbum['collectionName']) 
            DEBUG.pd(result)
            if result != None:
+              DEBUG.p('this album info exist in db!!!!')
               return result 
+           else:
+              DEBUG.pw('this album info not exist in db!!!!')
 
-        result = dao.getById(jsonResultAlbum['artistName'], jsonResultAlbum['collectionName']) 
-        coverImage_1200 = jsonResultAlbum['artworkUrl100'].replace('100x100', '1200x1200').split('/')[-1]
-        if result != None and os.path.exists(album_dir + '/' + coverImage_1200):
-           DEBUG.p('this album info exist in db!!!!')
-           DEBUG.p('album:%s; artist:%s'%( jsonResultAlbum['collectionName'], jsonResultAlbum['artistName']))
-           return result
+        #result = dao.getById(jsonResultAlbum['artistName'], jsonResultAlbum['collectionName']) 
+        #coverImage_1200 = jsonResultAlbum['artworkUrl100'].replace('100x100', '1200x1200').split('/')[-1]
+        #if result != None and os.path.exists(album_dir + '/' + coverImage_1200):
+        #   DEBUG.p('this album info exist in db!!!!')
+        #   DEBUG.p('album:%s; artist:%s'%( jsonResultAlbum['collectionName'], jsonResultAlbum['artistName']))
+        #   return result
 
         #save album info json file
         file = open(album_dir + "/album.json","w")

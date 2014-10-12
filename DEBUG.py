@@ -9,3 +9,6 @@ def pd(info):
     if settings.c['debug']:
        pprint.pprint(info)
     
+def pw(info):
+    if settings.c['warning']:
+       print 'WARNING:' + info 

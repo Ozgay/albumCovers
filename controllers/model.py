@@ -56,14 +56,25 @@ class Model:
         keyStr = '%s:%s'%(artist, albumName) 
         _id = hashlib.md5(keyStr.encode('ascii', 'ignore')).hexdigest()
         print _id
-        map_fun = '''function(doc) {
-             if (doc._id == '%s')
-                 emit(doc, null);
-                 }''' % (_id)
-        albums = self.__db[self.__db_name['cover']].query(map_fun)
-        for album in albums: 
-            return album.key 
-        return None
+        album = self.__db[self.__db_name['cover']].get(_id)
+        if album:
+           return dict(album)
+        return album
+        #map_fun = '''function(doc) {
+        #     if (doc._id == '%s')
+        #         emit(doc, null);
+        #         }''' % (_id)
+        #albums = self.__db[self.__db_name['cover']].query(map_fun)
+        #for album in albums: 
+        #    return album.key 
+        #return None
+
+    def getById2(self, id):
+        print id
+        album = self.__db[self.__db_name['cover']].get(id)
+        if album:
+           return dict(album)
+        return album
 
     def getByKeyValue(self, key, value):
         map_fun = '''function(doc) {
@@ -105,12 +116,12 @@ class Model:
             return album.key 
         return None
 
-    def getRandom(self, seed = 11):
+    def getRandom(self, seed = 11111):
         db = self.getAllDoc()    
         tenNews = [] 
         for id in db:
             rd = random.randint(0, seed)
-            if rd != 5:
+            if rd != 1:
                continue
             if len(tenNews) < 10:
                print db[id]
