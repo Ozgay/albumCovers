@@ -4,6 +4,7 @@ import re
 import urllib2
 import urllib
 import json
+import traceback
 import DEBUG
 from controllers.model import dao
 
@@ -131,7 +132,7 @@ class ItunesAPI:
             login_data = urllib.urlencode({})
             login_headers = {'Referer':url, 'User-Agent':'Opera/9.60',}
             login_request = urllib2.Request(url, login_data, login_headers)
-            result = urllib2.urlopen(login_request).read()
+            result = urllib2.urlopen(login_request, data=None, timeout=30).read()
             return json.loads(result.decode("utf-8"))['results']
         except:
             DEBUG.p('get data failed, and try again...')
@@ -139,7 +140,7 @@ class ItunesAPI:
                 login_data = urllib.urlencode({})
                 login_headers = {'Referer':url, 'User-Agent':'Opera/9.60',}
                 login_request = urllib2.Request(url, login_data, login_headers)
-                result = urllib2.urlopen(login_request).read()
+                result = urllib2.urlopen(login_request, data=None, timeout=30).read()
                 return json.loads(result.decode("utf-8"))['results']
             except:
                 DEBUG.p('err: get data failed from: %s' % (url))
@@ -148,30 +149,44 @@ class ItunesAPI:
 
     def __saveCoverImage(self, album_dir, coverImageUrl):
         try:
-            f = urllib2.urlopen(coverImageUrl)
-            with open(album_dir + '/' + coverImageUrl.split('/')[-1], 'wb') as code:
-                code.write(f.read())
+            #f = urllib2.urlopen(coverImageUrl)
+            #with open(album_dir + '/' + coverImageUrl.split('/')[-1], 'wb') as code:
+            #    code.write(f.read())
+            data = urllib2.urlopen(coverImageUrl, data=None, timeout=20).read()
+            DEBUG.p('got data:') 
+            f = open(album_dir + '/' + coverImageUrl.split('/')[-1], 'wb')
+            f.write(data)
             DEBUG.p('%s Pic Saved!' % (coverImageUrl.split('/')[-1])) 
+            f.close()
+            return 1 
         except:
             DEBUG.p('%s Pic Saved failed! and try again...' % (coverImageUrl.split('/')[-1])) 
             try:
-                f = urllib2.urlopen(coverImageUrl)
-                with open(album_dir + '/' + coverImageUrl.split('/')[-1], 'wb') as code:
-                    code.write(f.read())
+                data = urllib2.urlopen(coverImageUrl, data=None, timeout=30).read()
+                DEBUG.p('got data:') 
+                f = open(album_dir + '/' + coverImageUrl.split('/')[-1], 'wb')
+                f.write(data)
                 DEBUG.p('%s Pic Saved!' % (coverImageUrl.split('/')[-1])) 
+                f.close()
+                return 1 
             except:
                 DEBUG.p('err: %s Pic Saved failed!' % (coverImageUrl.split('/')[-1])) 
+                #remove failed-file
+                os.remove(album_dir + '/' + coverImageUrl.split('/')[-1])
+                f = open(album_dir + '/' + coverImageUrl.split('/')[-1] + ".failed", "w")
+                f.close()
+                return 0 
 
     def __saveAllInfos(self, jsonResultAlbum, country):
         #prepare dir
         dir_len = len(jsonResultAlbum['artistName'])
         if dir_len > 255:
-            artist_dir = os.getcwd() + '/static/images/' + jsonResultAlbum['artistName'][0:254]
+            artist_dir = os.getcwd() + '/static/images/' + jsonResultAlbum['artistName'][0:200]
         else:
             artist_dir = os.getcwd() + '/static/images/' + jsonResultAlbum['artistName']
         dir_len = len(jsonResultAlbum['collectionName'])
         if dir_len > 255:
-            album_dir = artist_dir + '/' + jsonResultAlbum['collectionName'][0:254]
+            album_dir = artist_dir + '/' + jsonResultAlbum['collectionName'][0:200]
         else:
             album_dir = artist_dir + '/' + jsonResultAlbum['collectionName']
 
@@ -180,10 +195,18 @@ class ItunesAPI:
         if not os.path.exists(album_dir):
            os.makedirs(album_dir)
         else:
-           DEBUG.p('this album info exist!!!!')
+           DEBUG.p('this album:%s info exist!!!!'%(album_dir))
            result = dao.getById(jsonResultAlbum['artistName'], jsonResultAlbum['collectionName']) 
            DEBUG.pd(result)
-           return result 
+           if result != None:
+              return result 
+
+        result = dao.getById(jsonResultAlbum['artistName'], jsonResultAlbum['collectionName']) 
+        coverImage_1200 = jsonResultAlbum['artworkUrl100'].replace('100x100', '1200x1200').split('/')[-1]
+        if result != None and os.path.exists(album_dir + '/' + coverImage_1200):
+           DEBUG.p('this album info exist in db!!!!')
+           DEBUG.p('album:%s; artist:%s'%( jsonResultAlbum['collectionName'], jsonResultAlbum['artistName']))
+           return result
 
         #save album info json file
         file = open(album_dir + "/album.json","w")
@@ -192,14 +215,17 @@ class ItunesAPI:
 
         
         ##save album cover images
+        ret = 0 
         coverImageUrl = jsonResultAlbum['artworkUrl100']
-        self.__saveCoverImage(album_dir, coverImageUrl)
+        ret += self.__saveCoverImage(album_dir, coverImageUrl)
         coverImageUrl_170 = coverImageUrl.replace('100x100', '170x170')
-        self.__saveCoverImage(album_dir, coverImageUrl_170)
+        ret += self.__saveCoverImage(album_dir, coverImageUrl_170)
         coverImageUrl_600 = coverImageUrl.replace('100x100', '600x600')
-        self.__saveCoverImage(album_dir, coverImageUrl_600)
+        ret += self.__saveCoverImage(album_dir, coverImageUrl_600)
         coverImageUrl_1200 = coverImageUrl.replace('100x100', '1200x1200')
-        self.__saveCoverImage(album_dir, coverImageUrl_1200)
+        ret += self.__saveCoverImage(album_dir, coverImageUrl_1200)
+        if ret == 0:
+           return ret 
 
         info = {
                 'album_name': '',
@@ -244,21 +270,34 @@ class ItunesAPI:
                musicContains.append(jsonResultMusic['trackName'])
            jsonMusics = jsonResultMusics
         else:
-            for jsonResultMusic in jsonResultMusics:
-                if jsonResultMusic['artistName'] == jsonResultAlbum['artistName']:
-                   musicContains.append(jsonResultMusic['trackName'])
-                   jsonMusics.append(jsonResultMusic)
+           for jsonResultMusic in jsonResultMusics:
+               if jsonResultMusic['artistName'] == jsonResultAlbum['artistName']:
+                  musicContains.append(jsonResultMusic['trackName'])
+                  jsonMusics.append(jsonResultMusic)
+        try:
+            if len(jsonMusics) == 0:
+               for jsonResultMusic in jsonResultMusics:
+                   if jsonResultMusic['collectionId'] == jsonResultAlbum['collectionId']:
+                      musicContains.append(jsonResultMusic['trackName'])
+                      jsonMusics.append(jsonResultMusic)
+        except:
+            DEBUG.p("empty music list!!!")
 
         #save music list json file
         file = open(album_dir + "/album_musics.json","w")
         json.dump(jsonMusics, file)
         file.close()
 
-        info['music_contain'] = musicContains 
+        info['music_contain'] = list(set(musicContains)) 
         DEBUG.pd(info)
 
-        #record info into db
-        dao.addOneDoc(info)
+        try:
+            #record info into db
+            dao.addOneDoc(info)
+        except:
+            print 'add doc failed: %s:%s'%(info['artist'], info['album_name'])
+            print traceback.print_exc()
+            
 
         return info
     def __getMusicLists(self, albumName, country):
@@ -441,6 +480,7 @@ class ItunesAPI:
         #get all albums of name 'albumName' 
         jsonResultAlbums = self.__getInfoByArtistName(artistName, country)
         for jsonResultAlbum in jsonResultAlbums:
+            DEBUG.p('albumName:%s; collectionName:%s'%(albumName, jsonResultAlbum['collectionName']))
             if jsonResultAlbum['collectionName'] == albumName:
                     ret = self.__saveAllInfos(jsonResultAlbum, country)
                     if not ret: 
@@ -449,8 +489,35 @@ class ItunesAPI:
 
         return infos
 
+    def getInfosWithAlbum_deepdeep(self, albumName, country, limit = 50):
+        if not albumName:
+           DEBUG.p('Please special the album name')
+           return false 
+        if not country:
+           DEBUG.p('country undefine, use "us" as defaulted')
+           country = 'us'
+        if limit != 50:
+           self.limit = int(limit)
+
+        infos = []
+        #get all albums of name 'albumName' 
+        jsonResultAlbums = self.__getInfoByAlbumName(albumName, country)
+        for jsonResultAlbum in jsonResultAlbums:
+            ret = self.__saveAllInfos(jsonResultAlbum, country)
+            if not ret: 
+               continue
+            infos.append(ret) 
+
+            #get all albums of the artist
+            infos.extend(self.getInfosWithAritstName_deep(jsonResultAlbum['artistName'], country, limit))
+            #get all albums of the album 
+            infos.extend(self.getInfosWithAlbumName_deep(jsonResultAlbum['collectionName'], country, limit))
+        return infos
+
 
 itunesapi = ItunesAPI()
 if __name__ == '__main__':
     #json = api.__getResponeResult('https://itunes.apple.com/search?term=%E5%AE%89%E5%92%8C%E6%A1%A5%E5%8C%97&country=tw&media=music&entity=album')
-    api.__getInfoByAlbumName('Bigger, Better, Faster, More!', 'tw')
+    #itunesapi.__getInfoByAlbumName('Bigger, Better, Faster, More!', 'tw')
+    itunesapi.getInfosWithAlbum_deepdeep('Bigger, Better, Faster, More!', 'us', 200)
+    

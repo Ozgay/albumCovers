@@ -45,6 +45,7 @@ class Model:
     def addOneDoc(self, doc):
         keyStr = '%s:%s'%(doc['artist'], doc['album_name']) 
         doc['_id'] = hashlib.md5(keyStr.encode('ascii', 'ignore')).hexdigest()
+        print '_id:%s'%(doc['_id'])
         doc_id, doc_rev = self.__db[self.__db_name['cover']].save(doc)
         print 'addOneDoc done'
 
@@ -54,6 +55,7 @@ class Model:
     def getById(self, artist, albumName):
         keyStr = '%s:%s'%(artist, albumName) 
         _id = hashlib.md5(keyStr.encode('ascii', 'ignore')).hexdigest()
+        print _id
         map_fun = '''function(doc) {
              if (doc._id == '%s')
                  emit(doc, null);
