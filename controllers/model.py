@@ -124,7 +124,7 @@ class Model:
             if rd != 1:
                continue
             if len(tenNews) < 10:
-               print db[id]
+               #print db[id]
                tenNews.append(db[id])
         return tenNews
 

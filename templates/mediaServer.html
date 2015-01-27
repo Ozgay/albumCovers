@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+$:render.header()
+$ ip = '172.17.144.34:8000'
+
+<script> 
+function supportType(e, vidType, codType){ 
+  myVid=document.createElement('video');
+  isSupp=myVid.canPlayType(vidType+';codecs="'+codType+'"');
+  if (isSupp==""){
+    isSupp="No";
+  }
+  e.target.parentNode.innerHTML="Answer: " + isSupp;
+} 
+</script> 
+<!--script src="http://lionsroarmusic.com/code/video-js/video.js"></script>
+<link href="http://lionsroarmusic.com/code/video-js/video-js.css" rel="stylesheet">
+<script>
+      _V_.options.flash.swf = "http://lionsroarmusic.com/code/video/video-js/video-js.swf"
+</script-->
+
+<div class="container" style="background-color:#FFFFCC">
+
+<div class="row" style="text-align:center" height="80">
+    <h3>...Test...</h3>
+</div>
+<div class="row">
+    <div class="span6" style="text-align:center">
+        <video controls preload="auto" width="440" height="280"> 
+          <source src="http://$ip/LoverCD1.mp4" type="video/mp4">
+        </video>
+        <div style="text-align:center" width="440" height="40">
+            <a style="font-size:20px;"> ...CD2... </a><br>
+        </div>
+    </div>
+    <div class="span6" style="text-align:center">
+        <video controls preload="auto" width="440" height="280"> 
+          <source src="http://$ip/LoverCD2.mp4" type="video/mp4">
+        </video>
+        <div style="text-align:center" width="440" height="40">
+            <a style="font-size:20px;"> ...CD2... </a><br>
+        </div>
+    </div>
+</div>
+
+<div class="row" style="text-align:center" height="80">
+    <h3>...H...</h3>
+</div>
+<div class="row">
+    <div class="span6" style="text-align:center">
+        <video controls preload="auto" width="440" height="280"> 
+          <source src="http://$ip/h.1.mp4" type="video/mp4">
+        </video>
+        <div style="text-align:center" width="440" height="80">
+            <a style="font-size:20px;"> ...LINGERIES_OFFICE.1... </a><br>
+        </div>
+    </div>
+    <div class="span6" style="text-align:center">
+        <video controls preload="auto" width="440" height="280"> 
+          <source src="http://$ip/h.2.mp4" type="video/mp4">
+        </video>
+        <div style="text-align:center" width="440" height="80">
+            <a style="font-size:20px;"> ...LINGERIES_OFFICE.2... </a><br>
+        </div>
+    </div>
+    <br/><br/>
+    <div class="span6" style="text-align:center">
+        <video controls preload="auto" width="440" height="280"> 
+          <source src="http://$ip/h.3.mp4" type="video/mp4">
+        </video>
+        <div style="text-align:center" width="440" height="80">
+            <a style="font-size:20px;"> ...LINGERIES_OFFICE.3... </a><br>
+        </div>
+    </div>
+</div>
+
+<!--video src="http://$ip/test.mp4" controls autoplay loop muted preload="auto" height="270" width="480" type="video/mp4"></video-->
+<br><br>
+
+<h4>airline stewardess:</h4><br>
+<video preload="yes" autoplay loop controls="true" width="440" height="280">
+    <source src="http://$ip/airlineStewardess-1.mp4" type="video/mp4">
+</video>
+<video preload="yes" autoplay loop controls="true" width="440" height="280">
+    <source src="http://$ip/airlineStewardess-2.mp4" type="video/mp4">
+</video>
+<video preload="yes" autoplay loop controls="true" width="440" height="280">
+    <source src="http://$ip/airlineStewardess-3.mp4" type="video/mp4">
+</video>
+<video preload="yes" autoplay loop controls="true" width="440" height="280">
+    <source src="http://$ip/airlineStewardess-4.mp4" type="video/mp4">
+</video>
+<br><br>
+
+<h4>korea:</h4><br>
+<video preload="yes" autoplay loop controls="true" width="440" height="280">
+    <source src="http://$ip/korea.mp4" type="video/mp4">
+</video>
+<br><br>
+
+<h4>Love Lesson:</h4><br>
+<video preload="yes" autoplay loop controls="true" width="440" height="280">
+    <source src="http://$ip/loveLesson.mp4" type="video/mp4">
+</video>
+<br><br>
+
+
+<h3>喜剧之王:</h3><br>
+<video preload="yes" autoplay loop controls="true" width="440" height="280">
+    <source src="http://$ip/xjzw.mp" type="video/mp4">
+</video>
+
+<h3>我的野蛮女友:</h3><br>
+<video preload="yes" autoplay loop controls="true" width="440" height="280">
+    <source src="http://$ip/MyCurelGirlFriend.mp4" type="video/mp4">
+</video>
+
+<h3>OO:</h3><br>
+<video preload="yes" autoplay loop controls="true" width="440" height="280">
+    <source src="http://$ip/oo.mp4" type="video/mp4">
+</video>
+
+<!--button onclick="supportType(event, 'video/mp4', 'avc1.42E01E, mp4a.40.2')" type="button">mp4:</button-->
+</div>
+
+$:render.foot()
